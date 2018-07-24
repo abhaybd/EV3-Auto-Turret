@@ -18,7 +18,7 @@ public class Test {
     }
     
     private RemoteVisionProcessor vision;
-    private VisionFrame visionFrame;
+    private volatile VisionFrame visionFrame;
     private Thread visionThread;
     private Thread trackingThread;
     private final Object lock = new Object();
@@ -81,6 +81,12 @@ public class Test {
 	    public void run() {
 		while(!Thread.interrupted()) {
 		    trackTargetPeriodic();
+		    try {
+			Thread.sleep(1000);
+		    } catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		    }
 		}
 	    }
 	});

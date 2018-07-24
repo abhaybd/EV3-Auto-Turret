@@ -127,15 +127,16 @@ public class RemoteVisionProcessor {
 	}
 	
 	public VisionFrame copy() {
-	    VisionFrame vs = new VisionFrame();
-	    vs.isTargetPresent = isTargetPresent;
-	    vs.targetPitch = targetPitch;
-	    vs.targetYaw = targetYaw;
-	    vs.manualOverride = manualOverride;
-	    vs.pitchPower = pitchPower;
-	    vs.yawPower = yawPower;
-	    vs.manualFire = manualFire;
-	    return vs;
+	    VisionFrame vf = new VisionFrame();
+	    vf.timestamp = timestamp;
+	    vf.isTargetPresent = isTargetPresent;
+	    vf.targetPitch = targetPitch;
+	    vf.targetYaw = targetYaw;
+	    vf.manualOverride = manualOverride;
+	    vf.pitchPower = pitchPower;
+	    vf.yawPower = yawPower;
+	    vf.manualFire = manualFire;
+	    return vf;
 	}
 	
 	@Override

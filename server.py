@@ -89,8 +89,8 @@ while True:
             y = (bbox[1]+bbox[3])/2.0 - img.shape[0]
             X_FOV = 60
             Y_FOV = 60
-            x_deg = (x / (img.shape[1]/2.0)) * X_FOV/2.0
-            y_deg = (y / (img.shape[0]/2.0)) * Y_FOV/2.0
+            x_deg = round((x / (img.shape[1]/2.0)) * X_FOV/2.0)
+            y_deg = round((y / (img.shape[0]/2.0)) * Y_FOV/2.0)
         last_frame.targetPitch = y_deg
         last_frame.targetYaw = x_deg
         last_frame.timestamp = millis()

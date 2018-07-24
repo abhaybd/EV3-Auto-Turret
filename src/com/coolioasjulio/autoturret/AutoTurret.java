@@ -24,7 +24,7 @@ public class AutoTurret {
     }
     
     private RemoteVisionProcessor vision;
-    private VisionFrame visionFrame;
+    private volatile VisionFrame visionFrame;
     private Thread visionThread;
     private Thread trackingThread;
     private final Object lock = new Object();
@@ -77,6 +77,7 @@ public class AutoTurret {
 		}
 	    }
 	});
+	visionThread.start();
     }
     
     private void zeroCalibrate() {
