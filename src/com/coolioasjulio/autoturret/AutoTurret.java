@@ -113,6 +113,8 @@ public class AutoTurret {
 	    vf = visionFrame.copy();
 	}
 	
+	if(System.currentTimeMillis() - vf.getTimestamp() > 1000) return;
+	
 	if(vf.isManualOverride()) {
 	    pitchMotor.setSpeed(round(vf.getPitchPower() * pitchMotor.getMaxSpeed()));
 	    yawMotor.setSpeed(round(vf.getYawPower() * yawMotor.getMaxSpeed()));

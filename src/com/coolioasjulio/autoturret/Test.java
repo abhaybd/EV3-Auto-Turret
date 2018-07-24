@@ -1,35 +1,99 @@
 package com.coolioasjulio.autoturret;
 
-import lejos.hardware.Button;
-import lejos.hardware.lcd.LCD;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.MotorPort;
-import lejos.robotics.RegulatedMotor;
+import com.coolioasjulio.autoturret.RemoteVisionProcessor.VisionFrame;
 
 public class Test {
+    
     public static void main(String[] args) {
-	final RegulatedMotor yawMotor = new EV3LargeRegulatedMotor(MotorPort.A);
-	final RegulatedMotor pitchMotor = new EV3LargeRegulatedMotor(MotorPort.D);
-	Thread t = new Thread(new Runnable() {
+	Test turret = new Test();
+	turret.start();
+	
+	try {
+	    synchronized(turret) {
+		turret.wait();		
+	    }
+	} catch (InterruptedException e) {
+	    e.printStackTrace();
+	}
+    }
+    
+    private RemoteVisionProcessor vision;
+    private VisionFrame visionFrame;
+    private Thread visionThread;
+    private Thread trackingThread;
+    private final Object lock = new Object();
+    
+    public void start() {
+	startVisionProcessing();
+	startTrackingPosition();
+    }
+    
+    public void stop() {
+	visionThread.interrupt();
+	trackingThread.interrupt();
+	visionThread = null;
+	trackingThread = null;
+	vision.stop();
+    }
+    
+    private void startVisionProcessing() {
+	if(visionThread != null) {
+	    visionThread.interrupt();
+	    try {
+		visionThread.join();
+	    } catch (InterruptedException e) {
+		e.printStackTrace();
+	    }
+	}
+	
+	visionThread = new Thread(new Runnable() {
 	    public void run() {
-		LCD.clearDisplay();
-		while(!Thread.interrupted()) {
-		    LCD.drawString(String.format("%d yaw - %d pitch", 
-			    yawMotor.getTachoCount(),  pitchMotor.getTachoCount()), 0, 0);
-		    try {
-			Thread.sleep(20);
-		    } catch (InterruptedException e) {
-			return;
+		System.out.println("Connecting to server...");
+		vision = RemoteVisionProcessor.getInstance();
+		System.out.println("Connected!");
+		try {
+		    while(!Thread.interrupted()) {
+			VisionFrame vf = vision.process();			
+			synchronized(lock) {
+			    visionFrame = vf;
+			}
 		    }
-		}		
+		} catch(Exception e) {
+		    e.printStackTrace();
+		    return;
+		}
 	    }
 	});
-	t.setDaemon(true);
-	t.start();
+	visionThread.start();
+    }
+    
+    private void startTrackingPosition() {
+	if(trackingThread != null) {
+	    trackingThread.interrupt();
+	    try {
+		trackingThread.join();
+	    } catch (InterruptedException e) {
+		e.printStackTrace();
+	    }
+	}
 	
-	Button.ESCAPE.waitForPress();
-	t.interrupt();
-	yawMotor.close();
-	pitchMotor.close();
+	trackingThread = new Thread(new Runnable() {
+	    public void run() {
+		while(!Thread.interrupted()) {
+		    trackTargetPeriodic();
+		}
+	    }
+	});
+	trackingThread.start();
+    }
+    
+    private void trackTargetPeriodic() {
+	VisionFrame vf;
+	synchronized(lock) {
+	    if(visionFrame == null) return;
+	    vf = visionFrame.copy();
+	}
+	
+	System.out.println(vf.toString());
     }
 }

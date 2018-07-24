@@ -91,6 +91,7 @@ public class RemoteVisionProcessor {
     }
     
     public static class VisionFrame {
+	private long timestamp;
 	private boolean isTargetPresent;
 	private int targetPitch;
 	private int targetYaw;
@@ -98,6 +99,10 @@ public class RemoteVisionProcessor {
 	private double pitchPower;
 	private double yawPower;
 	private boolean manualFire;
+	
+	public long getTimestamp() {
+	    return timestamp;
+	}
 	
 	public boolean isTargetPresent() {
 	    return isTargetPresent;
@@ -131,6 +136,11 @@ public class RemoteVisionProcessor {
 	    vs.yawPower = yawPower;
 	    vs.manualFire = manualFire;
 	    return vs;
+	}
+	
+	@Override
+	public String toString() {
+	    return new Gson().toJson(this);
 	}
     }
 }
