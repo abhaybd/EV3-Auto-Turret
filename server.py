@@ -1,19 +1,19 @@
+from __future__ import print_function, division
 import socket as s
 import time
 import threading
 from boltons.socketutils import BufferedSocket
-from types import SimpleNamespace
 import cv2
 import json
-from PIL import Image
-import yolo
+from imageprocessor import process
+from camera import setup_camera, get_resolution
 
 port = 4444
 udp_port = 4445
 
 serversocket = s.socket()
 serversocket.bind((s.gethostname(), port))
-serversocket.listen()
+serversocket.listen(1)
 
 def udp_listener_thread():
      udp_sock = s.socket(s.AF_INET, s.SOCK_DGRAM)
@@ -35,34 +35,41 @@ udp_thread.start()
 print('Waiting for TCP connection...')
 socket, addr = serversocket.accept()
 print('Recieved TCP connection from {}!'.format(addr))
+serversocket.close()
 
 socket = BufferedSocket(socket)
+
+class SimpleNamespace():
+    pass
 
 last_frame = SimpleNamespace()
 lock = threading.Lock()
 
-def reverse_bytes(img):
-    return img[:,:,::-1]
-
 def communicate_thread():
-    while True:
-        request = socket.recv_until(b'\n',timeout=None).decode('utf-8')
-        request = json.loads(request)
-        if request['id'] == 1:
-            lock.acquire()
-            response = json.dumps(last_frame.__dict__) + '\n'
-            print(response)
-            lock.release()
-            socket.send(response.encode())
-            socket.flush()
-        elif request['id'] == -1:
-            global running
-            running = False
-            break;
+    try:
+        while True:
+            request = socket.recv_until(b'\n',timeout=None).decode('utf-8')
+            request = json.loads(request)
+            if request['id'] == 1:
+                lock.acquire()
+                response = json.dumps(last_frame.__dict__) + '\n'
+                lock.release()
+                socket.send(response.encode())
+                socket.flush()
+            elif request['id'] == -1:
+                break;
+    except:
+        pass
+    global running
+    running = False
+    
 
 cam = cv2.VideoCapture(0)
+setup_camera(cam) # Reduce resolution to minimum
+print('Camera resolution: %s'%str(get_resolution(cam)))
 
-img_thread = threading.Thread(target=communicate_thread, args=(), daemon=True)
+img_thread = threading.Thread(target=communicate_thread)
+img_thread.daemon = True
 img_thread.start()
 
 running = True
@@ -73,24 +80,21 @@ while True:
     global img
     r, img = cam.read()
     if r:
-        rgb = reverse_bytes(img)
-        rgb = Image.fromarray(rgb)
-        bbox = yolo.get_pred(rgb,'person')
+        x,y = process(img)
         lock.acquire()
-        global last_frame
-        last_frame = SimpleNamespace()
-        if bbox == (-1,-1,-1,-1):
+        if x == -1 and y == -1:
             last_frame.isTargetPresent = False
             x_deg = 0
             y_deg = 0
         else:
             last_frame.isTargetPresent = True
-            x = (bbox[0]+bbox[2])/2.0 - img.shape[1]
-            y = (bbox[1]+bbox[3])/2.0 - img.shape[0]
-            X_FOV = 60
-            Y_FOV = 60
-            x_deg = round((x / (img.shape[1]/2.0)) * X_FOV/2.0)
-            y_deg = round((y / (img.shape[0]/2.0)) * Y_FOV/2.0)
+            X_FOV = 35.9
+            Y_FOV = 27.3
+            width = img.shape[1]
+            height = img.shape[0]
+            y = height-y
+            x_deg = round(((x-width/2.0) / (width/2.0)) * X_FOV/2.0)
+            y_deg = round(((y-height/2.0) / (height/2.0)) * Y_FOV/2.0)
         last_frame.targetPitch = y_deg
         last_frame.targetYaw = x_deg
         last_frame.timestamp = millis()
@@ -99,3 +103,4 @@ while True:
         cv2.waitKey(1)
 
 cam.release()
+cv2.destroyAllWindows()

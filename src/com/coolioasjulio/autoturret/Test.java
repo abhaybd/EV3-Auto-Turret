@@ -81,12 +81,12 @@ public class Test {
 	    public void run() {
 		while(!Thread.interrupted()) {
 		    trackTargetPeriodic();
-		    try {
-			Thread.sleep(1000);
-		    } catch (InterruptedException e) {
-			e.printStackTrace();
-			return;
-		    }
+//		    try {
+//			Thread.sleep(1000);
+//		    } catch (InterruptedException e) {
+//			e.printStackTrace();
+//			return;
+//		    }
 		}
 	    }
 	});
