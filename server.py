@@ -8,6 +8,13 @@ import json
 from imageprocessor import process
 from camera import setup_camera, get_resolution
 
+# x fov and y fov of the webcam
+X_FOV = 35.9
+Y_FOV = 27.3
+# TODO: only use diagonal fov and calculate x and y fov from resolution
+
+VISUALIZE_FEED = False
+
 port = 4444
 udp_port = 4445
 
@@ -66,7 +73,7 @@ def communicate_thread():
 
 cam = cv2.VideoCapture(0)
 setup_camera(cam) # Reduce resolution to minimum
-print('Camera resolution: %s'%str(get_resolution(cam)))
+print('Camera resolution: %s' % str(get_resolution(cam)))
 
 img_thread = threading.Thread(target=communicate_thread)
 img_thread.daemon = True
@@ -80,7 +87,7 @@ while True:
     global img
     r, img = cam.read()
     if r:
-        x,y = process(img)
+        x,y = process(img, visualize=VISUALIZE_FEED)
         lock.acquire()
         if x == -1 and y == -1:
             last_frame.isTargetPresent = False
@@ -88,8 +95,6 @@ while True:
             y_deg = 0
         else:
             last_frame.isTargetPresent = True
-            X_FOV = 35.9
-            Y_FOV = 27.3
             width = img.shape[1]
             height = img.shape[0]
             y = height-y
@@ -99,8 +104,9 @@ while True:
         last_frame.targetYaw = x_deg
         last_frame.timestamp = millis()
         lock.release()
-        cv2.imshow('Image',img)
-        cv2.waitKey(1)
+        if VISUALIZE_FEED:
+            cv2.imshow('Image',img)
+            cv2.waitKey(1)
 
 cam.release()
 cv2.destroyAllWindows()
