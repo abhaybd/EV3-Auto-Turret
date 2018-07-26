@@ -15,4 +15,4 @@ I'll make a requirements.txt later, but here are the requirements for now:
 * numpy (for data manipulation)
 * boltons (for easier tcp management)
 
-A turret that automatically shoots faces. Unlike my other project, hopefully I'll finish this one. This time, I'm strapping a Raspberry Pi to the robot with the webcam attached to it. It will be running a haar cascade for face detection. The EV3 turret will query the Raspberry Pi for vision data, (where are the faces) move to point at that location, and then shoot.
+A turret that automatically shoots faces. Unlike my [other project](https://github.com/coolioasjulio/EV3-Auto-Vision-Drive), hopefully I'll finish this one. This time, I'm strapping a Raspberry Pi to the robot with the webcam attached to it. It will be running a haar cascade for face detection. The EV3 turret will query the Raspberry Pi for vision data, (where are the faces) move to point at that location, and then shoot.
