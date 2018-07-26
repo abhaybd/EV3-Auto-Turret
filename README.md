@@ -4,7 +4,7 @@ This was built using [leJOS EV3](http://www.lejos.org/ev3.php) to run Java on an
 
 The robot (client) runs Java 1.7, and the Raspberry Pi (server) runs Python 2.7.
 
-I'll make a requirements.txt later, but here are the requirements for now:
+~I'll make a requirements.txt later~ (nevermind I made one) but here are the requirements for now:
 
 ### Java:
 * leJOS Eclipse plugin
