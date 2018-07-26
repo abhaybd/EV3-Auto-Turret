@@ -3,7 +3,7 @@ import sys
 import serial
 
 if len(sys.argv) > 1:
-    timeout=sys.argv[1]
+    timeout=int(sys.argv[1])
 else:
     timeout=100
 
