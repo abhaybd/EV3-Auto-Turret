@@ -1,11 +1,12 @@
-package com.coolioasjulio.autoturret;
+package com.coolioasjulio.autoturret.tests;
 
+import com.coolioasjulio.autoturret.RemoteVisionProcessor;
 import com.coolioasjulio.autoturret.RemoteVisionProcessor.VisionFrame;
 
-public class Test {
+public class ConnectionTest {
     
     public static void main(String[] args) {
-	Test turret = new Test();
+	ConnectionTest turret = new ConnectionTest();
 	turret.start();
 	
 	try {
