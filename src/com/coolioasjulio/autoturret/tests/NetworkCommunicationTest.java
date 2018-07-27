@@ -1,33 +1,34 @@
-package com.coolioasjulio.autoturret;
+package com.coolioasjulio.autoturret.tests;
 
+import com.coolioasjulio.autoturret.RemoteVisionProcessor;
 import com.coolioasjulio.autoturret.RemoteVisionProcessor.VisionFrame;
 
-public class Test {
-    
+public class NetworkCommunicationTest {
+
     public static void main(String[] args) {
-	Test turret = new Test();
-	turret.start();
-	
+	NetworkCommunicationTest test = new NetworkCommunicationTest();
+	test.start();
+
 	try {
-	    synchronized(turret) {
-		turret.wait();		
+	    synchronized (test) {
+		test.wait();
 	    }
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
 	}
     }
-    
+
     private RemoteVisionProcessor vision;
     private volatile VisionFrame visionFrame;
     private Thread visionThread;
     private Thread trackingThread;
     private final Object lock = new Object();
-    
+
     public void start() {
 	startVisionProcessing();
 	startTrackingPosition();
     }
-    
+
     public void stop() {
 	visionThread.interrupt();
 	trackingThread.interrupt();
@@ -35,9 +36,9 @@ public class Test {
 	trackingThread = null;
 	vision.stop();
     }
-    
+
     private void startVisionProcessing() {
-	if(visionThread != null) {
+	if (visionThread != null) {
 	    visionThread.interrupt();
 	    try {
 		visionThread.join();
@@ -45,20 +46,20 @@ public class Test {
 		e.printStackTrace();
 	    }
 	}
-	
+
 	visionThread = new Thread(new Runnable() {
 	    public void run() {
 		System.out.println("Connecting to server...");
 		vision = RemoteVisionProcessor.getInstance();
 		System.out.println("Connected!");
 		try {
-		    while(!Thread.interrupted()) {
-			VisionFrame vf = vision.process();			
-			synchronized(lock) {
+		    while (!Thread.interrupted()) {
+			VisionFrame vf = vision.process();
+			synchronized (lock) {
 			    visionFrame = vf;
 			}
 		    }
-		} catch(Exception e) {
+		} catch (Exception e) {
 		    e.printStackTrace();
 		    return;
 		}
@@ -66,9 +67,9 @@ public class Test {
 	});
 	visionThread.start();
     }
-    
+
     private void startTrackingPosition() {
-	if(trackingThread != null) {
+	if (trackingThread != null) {
 	    trackingThread.interrupt();
 	    try {
 		trackingThread.join();
@@ -76,30 +77,31 @@ public class Test {
 		e.printStackTrace();
 	    }
 	}
-	
+
 	trackingThread = new Thread(new Runnable() {
 	    public void run() {
-		while(!Thread.interrupted()) {
+		while (!Thread.interrupted()) {
 		    trackTargetPeriodic();
-//		    try {
-//			Thread.sleep(1000);
-//		    } catch (InterruptedException e) {
-//			e.printStackTrace();
-//			return;
-//		    }
+		    // try {
+		    // Thread.sleep(1000);
+		    // } catch (InterruptedException e) {
+		    // e.printStackTrace();
+		    // return;
+		    // }
 		}
 	    }
 	});
 	trackingThread.start();
     }
-    
+
     private void trackTargetPeriodic() {
 	VisionFrame vf;
-	synchronized(lock) {
-	    if(visionFrame == null) return;
+	synchronized (lock) {
+	    if (visionFrame == null)
+		return;
 	    vf = visionFrame.copy();
 	}
-	
+
 	System.out.println(vf.toString());
     }
 }

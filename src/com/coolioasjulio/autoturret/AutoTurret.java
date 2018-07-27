@@ -108,7 +108,7 @@ public class AutoTurret {
 
 	// Zero calibrate the pitch motor by stalling it (i'm not made of touch
 	// sensors)
-	pitchMotor.setSpeed(20);
+	pitchMotor.forward();
 	// Wait for the motor to stall
 	while (!pitchMotor.isStalled()) {
 	    // Intentionally empty
