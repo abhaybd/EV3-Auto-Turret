@@ -1,14 +1,12 @@
-from __future__ import print_function
-import sys
-import serial
+import bluetooth
+from boltons.socketutils import BufferedSocket
 
-if len(sys.argv) > 1:
-    timeout=int(sys.argv[1])
-else:
-    timeout=100
+EV3_MAC = '00:16:53:41:9A:21'
 
-conn = serial.Serial('/dev/rfcomm0',timeout=timeout)
-print('Connected to bluetooth')
+s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+s.connect((EV3_MAC,1))
+
+socket = BufferedSocket(s)
 
 while True:
-    print(conn.readline())
+    print(socket.recv_until('\n'))
