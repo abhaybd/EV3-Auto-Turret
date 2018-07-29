@@ -7,6 +7,7 @@ import cv2
 import json
 from imageprocessor import process
 from camera import Camera
+from manualcontrol import ManualController
 
 # x fov and y fov of the webcam
 X_FOV = 35.9
@@ -74,6 +75,8 @@ def communicate_thread():
 vision = Camera(process, X_FOV, Y_FOV)
 print('Camera resolution: %s' % str(vision.resolution()))
 
+controller = ManualController()
+
 img_thread = threading.Thread(target=communicate_thread)
 img_thread.daemon = True
 img_thread.start()
@@ -83,16 +86,23 @@ running = True
 while True:
     if not running:
         break
-    global img
-    frame, img = vision.get_vision_frame(visualize=VISUALIZE_FEED)
-    if frame is not None and img is not None:
+    if controller.manual_control():
         lock.acquire()
         global last_frame
-        last_frame = frame
+        last_frame = controller.get_frame()
         lock.release()
-        if VISUALIZE_FEED:
-            cv2.imshow('Image',img)
-            cv2.waitKey(1)
+    else:
+        global img
+        frame, img = vision.get_vision_frame(visualize=VISUALIZE_FEED)
+        if frame is not None and img is not None:
+            lock.acquire()
+            global last_frame
+            last_frame = frame
+            lock.release()
+            if VISUALIZE_FEED:
+                cv2.imshow('Image',img)
+                cv2.waitKey(1)
 
 vision.release()
+controller.release()
 cv2.destroyAllWindows()
