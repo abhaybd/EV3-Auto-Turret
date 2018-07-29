@@ -6,7 +6,7 @@ from boltons.socketutils import BufferedSocket
 import cv2
 import json
 from imageprocessor import process
-from camera import setup_camera, get_resolution
+from camera import Camera
 
 # x fov and y fov of the webcam
 X_FOV = 35.9
@@ -71,9 +71,8 @@ def communicate_thread():
     running = False
     
 
-cam = cv2.VideoCapture(0)
-setup_camera(cam) # Reduce resolution to minimum
-print('Camera resolution: %s' % str(get_resolution(cam)))
+vision = Camera(process, X_FOV, Y_FOV)
+print('Camera resolution: %s' % str(vision.resolution()))
 
 img_thread = threading.Thread(target=communicate_thread)
 img_thread.daemon = True
@@ -85,28 +84,15 @@ while True:
     if not running:
         break
     global img
-    r, img = cam.read()
-    if r:
-        x,y = process(img, visualize=VISUALIZE_FEED)
+    frame, img = vision.get_vision_frame(visualize=VISUALIZE_FEED)
+    if frame is not None and img is not None:
         lock.acquire()
-        if x == -1 and y == -1:
-            last_frame.isTargetPresent = False
-            x_deg = 0
-            y_deg = 0
-        else:
-            last_frame.isTargetPresent = True
-            width = img.shape[1]
-            height = img.shape[0]
-            y = height-y
-            x_deg = round(((x-width/2.0) / (width/2.0)) * X_FOV/2.0)
-            y_deg = round(((y-height/2.0) / (height/2.0)) * Y_FOV/2.0)
-        last_frame.targetPitch = y_deg
-        last_frame.targetYaw = x_deg
-        last_frame.timestamp = millis()
+        global last_frame
+        last_frame = frame
         lock.release()
         if VISUALIZE_FEED:
             cv2.imshow('Image',img)
             cv2.waitKey(1)
 
-cam.release()
+vision.release()
 cv2.destroyAllWindows()
