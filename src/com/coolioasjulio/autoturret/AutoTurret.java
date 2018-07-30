@@ -27,10 +27,21 @@ public class AutoTurret {
 						      // the motor thing
 
     public static void main(String[] args) {
+	Thread t = new Thread(new Runnable(){
+	    public void run(){
+		while(!Thread.interrupted()) {
+		    if(Button.ESCAPE.isDown()){
+			Thread.currentThread().interrupt();
+			System.exit(1);
+		    }
+		}
+	    }
+	});
+	t.setDaemon(false);
+	t.start();
+	
 	AutoTurret turret = new AutoTurret();
 	turret.start();
-
-	Button.ESCAPE.waitForPress();
     }
 
     private RemoteVisionProcessor vision;
