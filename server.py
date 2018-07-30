@@ -62,6 +62,7 @@ def communicate_thread():
                 lock.acquire()
                 response = json.dumps(last_frame.__dict__) + '\n'
                 lock.release()
+                print(response, end='')
                 socket.send(response.encode())
                 socket.flush()
             elif request['id'] == -1:
