@@ -10,19 +10,20 @@ vision = Camera(process, X_FOV, Y_FOV)
 print('Camera resolution: %s' % str(vision.resolution()))
 
 fps_sum = 0
-readings = 0
+samples = 0
 
 while True:
     before = time.time()
-    r, img = vision.get_vision_frame()
+    frame, img = vision.get_vision_frame()
     after = time.time()
     
-    if not r:
+    if frame is None or img is None:
         print('No camera detected!')
         break
     
     elapsed = after - before
     fps = 1.0/elapsed
     fps_sum += fps
-    readings += 1
-    print('\rFPS: %.1f, Avg. FPS: %.1f' % (fps, fps_sum / readings), end='')
+    samples += 1
+    avg_fps = fps_sum / samples
+    print('\rFPS: %.1f, Avg. FPS: %.1f, Samples: %d' % (fps, avg_fps, samples), end='')
