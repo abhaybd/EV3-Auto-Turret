@@ -14,8 +14,12 @@ readings = 0
 
 while True:
     before = time.time()
-    vision.get_vision_frame()
+    r, img = vision.get_vision_frame()
     after = time.time()
+    
+    if not r:
+        print('No camera detected!')
+        break
     
     elapsed = after - before
     fps = 1.0/elapsed
