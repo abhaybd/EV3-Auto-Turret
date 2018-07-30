@@ -78,16 +78,16 @@ public class AutoTurret {
 		System.out.println("Connecting to server...");
 		vision = RemoteVisionProcessor.getInstance();
 		System.out.println("Connected!");
-		while (!Thread.interrupted()) {
-		    try {
+		try {
+		    while (!Thread.interrupted()) {
 			VisionFrame vf = vision.process();
 			synchronized (lock) {
 			    visionFrame = vf;
 			}
-		    } catch (Exception e) {
-			e.printStackTrace();
-			return;
 		    }
+		} catch (Exception e) {
+		    e.printStackTrace();
+		    return;
 		}
 	    }
 	});

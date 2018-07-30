@@ -1,8 +1,14 @@
 from __future__ import with_statement
-from cv2 import CAP_PROP_FRAME_WIDTH as WIDTH_TAG
-from cv2 import CAP_PROP_FRAME_HEIGHT as HEIGHT_TAG
-import cv2
 import time
+import cv2
+
+# The tag changes depending on the version of cv2
+if cv2.__version__[0] == '3':
+    from cv2 import CAP_PROP_FRAME_WIDTH as WIDTH_TAG
+    from cv2 import CAP_PROP_FRAME_HEIGHT as HEIGHT_TAG
+else:
+    from cv2.cv import CAP_PROP_FRAME_WIDTH as WIDTH_TAG
+    from cv2.cv import CAP_PROP_FRAME_HEIGHT as HEIGHT_TAG
 
 with open('resolutions.txt') as f:
     lines = f.readlines()
