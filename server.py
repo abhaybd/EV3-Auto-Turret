@@ -9,10 +9,8 @@ from imageprocessor import process
 from camera import Camera
 from manualcontrol import ManualController
 
-# x fov and y fov of the webcam
-X_FOV = 35.9
-Y_FOV = 27.3
-# TODO: only use diagonal fov and calculate x and y fov from resolution
+# Diagonal fov of webcam in degrees. X fov will be calculated with aspect ratio.
+DIAG_FOV = 83
 
 VISUALIZE_FEED = False
 
@@ -73,7 +71,7 @@ def communicate_thread():
     running = False
     
 
-vision = Camera(process, X_FOV, Y_FOV)
+vision = Camera(process, DIAG_FOV)
 print('Camera resolution: %s' % str(vision.resolution()))
 
 controller = ManualController()

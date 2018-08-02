@@ -1,6 +1,7 @@
-from __future__ import with_statement
+from __future__ import with_statement, division
 import time
 import cv2
+import math
 
 # The tag changes depending on the version of cv2
 if cv2.__version__[0] == '3':
@@ -41,10 +42,9 @@ class VisionFrame(object):
     pass
 
 class Camera(object):
-    def __init__(self, image_processor, x_fov, y_fov, cam_index=0):
+    def __init__(self, image_processor, diag_fov, cam_index=0):
         self.processor = image_processor
-        self.x_fov = x_fov
-        self.y_fov = y_fov
+        self.diag_fov = math.radians(diag_fov)
         self.cam = cv2.VideoCapture(cam_index)
         setup_camera(self.cam)
     
@@ -64,9 +64,17 @@ class Camera(object):
                 last_frame.isTargetPresent = True
                 width = img.shape[1]
                 height = img.shape[0]
-                y = height-y
-                x_deg = round(((x-width/2.0) / (width/2.0)) * self.x_fov/2.0)
-                y_deg = round(((y-height/2.0) / (height/2.0)) * self.y_fov/2.0)
+                diagonal = math.sqrt(width**2 + height**2)
+                
+                x_fov = math.atan(math.tan(self.diag_fov/2.0) * (width/diagonal)) * 2
+                
+                x = x - (width/2.0)
+                y = (height/2.0) - y
+                
+                fov_dist = (width/2.0) / math.tan(x_fov/2.0)
+                
+                x_deg = round(math.atan2(x,fov_dist))
+                y_deg = round(math.atan2(y,fov_dist))
             last_frame.targetPitch = y_deg
             last_frame.targetYaw = x_deg
             last_frame.timestamp = millis()
