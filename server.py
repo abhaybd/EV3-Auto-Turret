@@ -12,7 +12,7 @@ from manualcontrol import ManualController
 # Diagonal fov of webcam in degrees. X fov will be calculated with aspect ratio.
 DIAG_FOV = 83
 
-VISUALIZE_FEED = False
+VISUALIZE_FEED = True
 
 port = 4444
 udp_port = 4445
@@ -60,7 +60,7 @@ def communicate_thread():
                 lock.acquire()
                 response = json.dumps(last_frame.__dict__) + '\n'
                 lock.release()
-                print(response, end='')
+                print('\r%s'%response, end='')
                 socket.send(response.encode())
                 socket.flush()
             elif request['id'] == -1:
@@ -87,7 +87,6 @@ while True:
         break
     if controller.manual_control():
         lock.acquire()
-        global last_frame
         last_frame = controller.get_frame()
         lock.release()
     else:
@@ -95,7 +94,6 @@ while True:
         frame, img = vision.get_vision_frame(visualize=VISUALIZE_FEED)
         if frame is not None and img is not None:
             lock.acquire()
-            global last_frame
             last_frame = frame
             lock.release()
             if VISUALIZE_FEED:

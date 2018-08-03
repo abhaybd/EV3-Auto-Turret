@@ -73,8 +73,8 @@ class Camera(object):
                 
                 fov_dist = (width/2.0) / math.tan(x_fov/2.0)
                 
-                x_deg = round(math.atan2(x,fov_dist))
-                y_deg = round(math.atan2(y,fov_dist))
+                x_deg = round(math.degrees(math.atan2(x,fov_dist)))
+                y_deg = round(math.degrees(math.atan2(y,fov_dist)))
             last_frame.targetPitch = y_deg
             last_frame.targetYaw = x_deg
             last_frame.timestamp = millis()
