@@ -24,7 +24,7 @@ serversocket.listen(1)
 
 def udp_listener_thread():
      udp_sock = s.socket(s.AF_INET, s.SOCK_DGRAM)
-     udp_sock.bind(('0.0.0.0',4445))
+     udp_sock.bind(('0.0.0.0', udp_port))
      print('Waiting for udp ping!')
      msg, addr = udp_sock.recvfrom(256)
      print('Recieved udp ping from {}!'.format(addr))
