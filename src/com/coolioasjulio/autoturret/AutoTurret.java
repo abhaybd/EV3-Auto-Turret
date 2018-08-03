@@ -14,32 +14,23 @@ public class AutoTurret {
     private static final int FIRE_SPEED = 90;
     private static final int YAW_ERR_THRESHOLD = 5;
     private static final int PITCH_ERR_THRESHOLD = 5;
-    
+
     private static final double MANUAL_YAW_POWER_LIMIT = 0.3;
     private static final double MANUAL_PITCH_POWER_LIMIT = 0.2;
-    
+
     private static final double AUTO_YAW_POWER_LIMIT = 1.0;
     private static final double AUTO_PITCH_POWER_LIMIT = 0.8;
-    
+
     private static final int LED_OFF_PATTERN = 0;
     private static final int LED_AUTO_PATTERN = 4;
     private static final int LED_MANUAL_PATTERN = 7;
 
-    private static final double YAW_POS_FACTOR = 3.0; // tach units per degree turned
-                                                // (gear ratio)
-    private static final double PITCH_POS_FACTOR = 1.0; // tach units per degree
-                                                  // turned (gear ratio)
-    private static final int YAW_MID_TO_LIMIT_ANGLE = 270; // tach units from midpoint
-                                                     // (origin) to forward
-                                                     // limit switch
-    private static final int PITCH_MID_TO_LIMIT_ANGLE = 52; // tach units from
-                                                      // midpoint (origin) to
-                                                      // the motor thing
+    private static final double YAW_POS_FACTOR = 3.0; // tach units per degree turned (gear ratio)
+    private static final double PITCH_POS_FACTOR = 1.0; // tach units per degree turned(gear ratio_
+    private static final int YAW_MID_TO_LIMIT_ANGLE = 270; // tach units from origin to limit switch
+    private static final int PITCH_MID_TO_LIMIT_ANGLE = 52; // tach units from origin to stall point
 
-    private static final int VISION_REFRESH_PER_SECOND = 20; // How many times per
-                                                       // second to grab
-                                                       // information from
-                                                       // vision server
+    private static final int VISION_REFRESH_PER_SECOND = 20; // Refresh rate for vision info
 
     public static void main(String[] args) {
         Thread t = new Thread(new Runnable() {
@@ -189,20 +180,20 @@ public class AutoTurret {
         }
 
         if (vf.isManualOverride()) {
-            if(!wasManualLast) {
+            if (!wasManualLast) {
                 Button.LEDPattern(LED_MANUAL_PATTERN);
             }
-            
+
             int pitchSpeed = round(MANUAL_PITCH_POWER_LIMIT * vf.getPitchPower() * pitchMotor.getMaxSpeed());
             int yawSpeed = round(MANUAL_YAW_POWER_LIMIT * vf.getYawPower() * yawMotor.getMaxSpeed());
-            
+
             setSpeed(pitchMotor, pitchSpeed);
             setSpeed(yawMotor, yawSpeed);
             setSpeed(fireMotor, vf.isManualFire() ? FIRE_SPEED : 0);
-            
+
             wasManualLast = true;
         } else {
-            if(wasManualLast) {
+            if (wasManualLast) {
                 Button.LEDPattern(LED_AUTO_PATTERN);
             }
             pitchMotor.setSpeed(round(AUTO_PITCH_POWER_LIMIT * pitchMotor.getMaxSpeed()));
@@ -215,11 +206,11 @@ public class AutoTurret {
             setSpeed(fireMotor, fireSpeed);
         }
     }
-    
+
     private void setSpeed(RegulatedMotor motor, int speed) {
-        if(speed != 0){
+        if (speed != 0) {
             motor.setSpeed(speed);
-            if(speed > 0){
+            if (speed > 0) {
                 motor.forward();
             } else {
                 motor.backward();
@@ -227,7 +218,7 @@ public class AutoTurret {
         } else {
             motor.stop(true);
         }
-        
+
     }
 
     private boolean onTarget(int targetYaw, int targetPitch) {
