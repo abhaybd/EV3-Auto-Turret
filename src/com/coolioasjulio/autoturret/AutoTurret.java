@@ -12,8 +12,8 @@ import lejos.robotics.RegulatedMotor;
 
 public class AutoTurret {
     private static int FIRE_SPEED = 90;
-    private static int YAW_ERR_THRESHOLD = 2;
-    private static int PITCH_ERR_THRESHOLD = 2;
+    private static int YAW_ERR_THRESHOLD = 5;
+    private static int PITCH_ERR_THRESHOLD = 5;
 
     private static double YAW_POS_FACTOR = 3.0; // tach units per degree turned
 						// (gear ratio)
@@ -26,11 +26,16 @@ public class AutoTurret {
 						      // midpoint (origin) to
 						      // the motor thing
 
+    private static int VISION_REFRESH_PER_SECOND = 20; // How many times per
+						       // second to grab
+						       // information from
+						       // vision server
+
     public static void main(String[] args) {
-	Thread t = new Thread(new Runnable(){
-	    public void run(){
-		while(!Thread.interrupted()) {
-		    if(Button.ESCAPE.isDown()){
+	Thread t = new Thread(new Runnable() {
+	    public void run() {
+		while (!Thread.interrupted()) {
+		    if (Button.ESCAPE.isDown()) {
 			Thread.currentThread().interrupt();
 			System.exit(1);
 		    }
@@ -39,7 +44,7 @@ public class AutoTurret {
 	});
 	t.setDaemon(false);
 	t.start();
-	
+
 	AutoTurret turret = new AutoTurret();
 	turret.start();
     }
@@ -91,9 +96,16 @@ public class AutoTurret {
 		System.out.println("Connected!");
 		try {
 		    while (!Thread.interrupted()) {
+			long startTime = System.currentTimeMillis();
 			VisionFrame vf = vision.process();
 			synchronized (lock) {
 			    visionFrame = vf;
+			}
+			long elapsedTime = System.currentTimeMillis() - startTime;
+			long interval = Math.round(1000.0 / (double) VISION_REFRESH_PER_SECOND);
+			long waitTimeMillis = interval - elapsedTime;
+			if (waitTimeMillis > 0) {
+			    Thread.sleep(waitTimeMillis);
 			}
 		    }
 		} catch (Exception e) {
@@ -160,7 +172,7 @@ public class AutoTurret {
 
 	// If the last vision frame is stale, don't do nothin'
 	if (System.currentTimeMillis() - vf.getTimestamp() > 1000) {
-	    return;	    
+	    return;
 	}
 
 	if (vf.isManualOverride()) {
