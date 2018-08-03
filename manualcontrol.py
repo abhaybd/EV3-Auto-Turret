@@ -1,5 +1,6 @@
-import xbox
+from __future__ import division
 import time
+from gamepad import GamePad
 
 class Frame(object):
     pass
@@ -8,10 +9,10 @@ def millis():
     return round(time.time()*1000)
 
 class ManualController(object):
-    def __init__(self, deadzone=0.1):
+    def __init__(self, deadzone=0.08):
         self.deadzone = deadzone
         try:
-            self.controller = xbox.Joystick()
+            self.controller = GamePad()
         except:
             self.controller = None
     
@@ -21,22 +22,24 @@ class ManualController(object):
     def manual_control(self):
         if not self.connected():
             return False
-        return self.controller.leftTrigger() > self.deadzone
+        return self.controller.left_trigger > self.deadzone
     
     def get_yaw_power(self):
         if not self.connected():
             return 0
-        return self.controller.leftX() if self.manual_control() else 0
+        x = self.controller.left_stick_x
+        return x if self.manual_control() and abs(x) > self.deadzone else 0
     
     def get_pitch_power(self):
         if not self.connected():
             return 0
-        return self.controller.rightY() if self.manual_control() else 0
+        y = self.controller.right_stick_y
+        return y if self.manual_control() and abs(y) > self.deadzone else 0
     
     def get_fire(self):
         if not self.connected():
             return False
-        return self.controller.rightTrigger() > self.deadzone if self.manual_control() else False
+        return self.manual_control() and self.controller.right_trigger > self.deadzone
     
     def get_frame(self):
         frame = Frame()

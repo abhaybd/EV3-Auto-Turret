@@ -46,8 +46,7 @@ public class RemoteVisionProcessor {
                 out.println(jsonRequest);
                 out.flush();
                 String jsonResponse = in.readLine();
-                VisionFrame response = gson.fromJson(jsonResponse, new TypeToken<VisionFrame>() {
-                }.getType());
+                VisionFrame response = gson.fromJson(jsonResponse, new TypeToken<VisionFrame>() {}.getType());
                 return response;
             }
         } catch (IOException e) {

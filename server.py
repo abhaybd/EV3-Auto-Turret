@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+__import__('sys').dont_write_bytecode = True # prevent stupid pyc files
 import socket as s
 import time
 import threading
@@ -25,11 +26,9 @@ def udp_listener_thread():
      udp_sock = s.socket(s.AF_INET, s.SOCK_DGRAM)
      udp_sock.bind(('0.0.0.0',4445))
      print('Waiting for udp ping!')
-     while True:
-         msg, addr = udp_sock.recvfrom(256)
-         print('Recieved udp ping from {}!'.format(addr))
-         udp_sock.sendto(msg, addr)
-         return
+     msg, addr = udp_sock.recvfrom(256)
+     print('Recieved udp ping from {}!'.format(addr))
+     udp_sock.sendto(msg, addr)
 
 def millis():
     return round(time.time()*1000)
@@ -51,6 +50,15 @@ class SimpleNamespace():
 last_frame = SimpleNamespace()
 lock = threading.Lock()
 
+def overwrite(message):
+    global last_message
+    try:
+        print('\r' + ''.join([' ']*len(last_message)), end='')
+    except:
+        pass
+    print('\r' + message, end='')
+    last_message = message
+
 def communicate_thread():
     try:
         while True:
@@ -58,15 +66,18 @@ def communicate_thread():
             request = json.loads(request)
             if request['id'] == 1:
                 lock.acquire()
-                response = json.dumps(last_frame.__dict__) + '\n'
+                response_json = json.dumps(last_frame.__dict__)
+                response = response_json + '\n'
                 lock.release()
-                print('\r%s'%response, end='')
+                if response != '{}\n':
+                    overwrite(response_json)
                 socket.send(response.encode())
                 socket.flush()
             elif request['id'] == -1:
                 break;
     except:
         pass
+    print('')
     global running
     running = False
     

@@ -79,7 +79,6 @@ public class NetworkUtils {
                                         DatagramPacket packet = new DatagramPacket(buf, 256, addr, serverPort);
                                         dataSocket.send(packet);
                                     } catch (IOException e) {
-                                        e.printStackTrace();
                                     }
                                     if (Thread.interrupted()) {
                                         return;
